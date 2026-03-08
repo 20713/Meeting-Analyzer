@@ -1,0 +1,24 @@
+# Environment variables
+.env
+.env.local
+
+# User uploads
+uploads/
+!uploads/.gitkeep
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac system files
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+# Virtual environment (if any)
+venv/
+env/
+.venv/
