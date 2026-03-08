@@ -175,23 +175,21 @@ def chat_response(user_input, sessions, current_session_id):
     
     # 添加用户消息到历史
     history.append({"role": "user", "content": user_input})
-    yield history, "" # 更新界面，清空输入框
+    
+    # 添加 AI 回复占位符，立即给用户反馈
+    history.append({"role": "assistant", "content": "⏳ 正在思考..."})
+    yield history, "" # 更新界面，清空输入框，显示"正在思考"
 
     # 构建 Prompt
-    # 注意：history 包含当前用户输入，但不包含即将生成的 AI 回复
-    # get_chat_prompt 需要的是之前的对话历史（不含本次提问，或者含本次提问取决于实现）
-    # 这里我们调整 get_chat_prompt 的逻辑，传入完整历史（不含本次），或者修改调用方式
-    # 之前逻辑：history 是 [[q, a], ... [current_q, ""]]
-    # 现在逻辑：history 是 [{u}, {a}, ... {current_u}]
+    # 注意：history 包含当前用户输入和刚刚添加的占位符
+    # get_chat_prompt 需要的是之前的对话历史（不含本次提问和占位符）
+    # 之前逻辑：history 是 [{u}, {a}, ... {current_u}, {placeholder_a}]
     
-    # 为了保持 analyzer.py 的逻辑简单，我们传入除本次用户输入外的历史
-    previous_history = history[:-1] 
+    # 传入除本次提问和占位符外的历史
+    previous_history = history[:-2] 
     messages = AnalyzerPrompts.get_chat_prompt(content, previous_history)
     messages.append({"role": "user", "content": user_input})
     
-    # 添加 AI 回复占位符
-    history.append({"role": "assistant", "content": ""})
-
     # 流式生成
     full_response = ""
     try:
