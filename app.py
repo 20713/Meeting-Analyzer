@@ -4,6 +4,7 @@ import uuid
 import logging
 import signal
 import sys
+import time
 from core.config import Config
 from core.llm_client import LLMClient
 from core.analyzer import AnalyzerPrompts
@@ -110,8 +111,8 @@ def update_session_list(sessions):
         prefix = "📋 " if data['file_type'] == 'demo' else "📄 "
         # 截断过长的文件名以适应侧边栏
         filename = data['filename']
-        if len(filename) > 20:
-            filename = filename[:17] + "..."
+        if len(filename) > 30:
+            filename = filename[:25] + "..."
         choices.append((f"{prefix}{filename}", sid))
     return choices
 
@@ -145,6 +146,15 @@ def generate_initial_report(sessions, current_session_id):
         history.append({"role": "assistant", "content": ""})
     
     # 流式生成
+    for frame in [
+        "⏳ 正在生成会议分析报告，请稍候",
+        "⏳ 正在生成会议分析报告，请稍候.",
+        "⏳ 正在生成会议分析报告，请稍候..",
+        "⏳ 正在生成会议分析报告，请稍候..."
+    ]:
+        history[-1]['content'] = frame
+        yield history
+        time.sleep(2.0)
     full_response = ""
     try:
         for chunk in llm_client.chat_stream(messages):
@@ -191,6 +201,15 @@ def chat_response(user_input, sessions, current_session_id):
     messages.append({"role": "user", "content": user_input})
     
     # 流式生成
+    for frame in [
+        "⏳ 正在思考",
+        "⏳ 正在思考.",
+        "⏳ 正在思考..",
+        "⏳ 正在思考..."
+    ]:
+        history[-1]['content'] = frame
+        yield history, ""
+        time.sleep(4.0)
     full_response = ""
     try:
         for chunk in llm_client.chat_stream(messages):
